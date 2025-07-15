@@ -8,6 +8,7 @@ export function useWebRTC(socket, roomId) {
   const [remoteStream, setRemoteStream] = useState(null);
   const [isInitiator, setIsInitiator] = useState(false);
   const [remoteSocketId, setRemoteSocketId] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState("disconnected");
 
   useEffect(() => {
     const initializeMedia = async () => {
@@ -75,6 +76,7 @@ export function useWebRTC(socket, roomId) {
 
       pc.onconnectionstatechange = () => {
         console.log("Connection state:", pc.connectionState);
+        setConnectionStatus(pc.connectionState);
       };
 
       return pc;
@@ -84,26 +86,33 @@ export function useWebRTC(socket, roomId) {
     socket.on("user-joined", async ({ participant, participants }) => {
       console.log("User joined:", participant, "Total participants:", participants.length);
       
-      // If there are exactly 2 participants and we're the first one, initiate the call
+      // If there are exactly 2 participants, check if we should initiate
       if (participants.length === 2) {
         const otherParticipant = participants.find(p => p.socketId !== socket.id);
-        if (otherParticipant) {
+        const currentParticipant = participants.find(p => p.socketId === socket.id);
+        
+        if (otherParticipant && currentParticipant) {
           setRemoteSocketId(otherParticipant.socketId);
-          setIsInitiator(true);
           
-          console.log("Initiating call to:", otherParticipant.socketId);
+          // The participant who joined first (lower ID) initiates the call
+          const shouldInitiate = currentParticipant.id < otherParticipant.id;
           
-          const pc = createPeerConnection();
-          peerConnectionRef.current = pc;
+          if (shouldInitiate) {
+            setIsInitiator(true);
+            console.log("Initiating call to:", otherParticipant.socketId);
+            
+            const pc = createPeerConnection();
+            peerConnectionRef.current = pc;
 
-          const offer = await pc.createOffer();
-          await pc.setLocalDescription(offer);
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
 
-          socket.emit("webrtc-offer", { 
-            to: otherParticipant.socketId, 
-            offer: offer,
-            roomId: roomId 
-          });
+            socket.emit("webrtc-offer", { 
+              to: otherParticipant.socketId, 
+              offer: offer,
+              roomId: roomId 
+            });
+          }
         }
       }
     });
@@ -112,12 +121,32 @@ export function useWebRTC(socket, roomId) {
     socket.on("room-joined", ({ participant, participants }) => {
       console.log("Room joined:", participant, "Existing participants:", participants.length);
       
-      // If there are already other participants, we'll wait for them to initiate
+      // If there are already 2 participants when we join, set up for connection
       if (participants.length === 2) {
         const otherParticipant = participants.find(p => p.socketId !== socket.id);
         if (otherParticipant) {
           setRemoteSocketId(otherParticipant.socketId);
-          setIsInitiator(false);
+          
+          // The participant who joined first (lower ID) will initiate
+          const shouldInitiate = participant.id < otherParticipant.id;
+          setIsInitiator(shouldInitiate);
+          
+          if (shouldInitiate) {
+            console.log("Starting call as initiator to:", otherParticipant.socketId);
+            setTimeout(async () => {
+              const pc = createPeerConnection();
+              peerConnectionRef.current = pc;
+
+              const offer = await pc.createOffer();
+              await pc.setLocalDescription(offer);
+
+              socket.emit("webrtc-offer", { 
+                to: otherParticipant.socketId, 
+                offer: offer,
+                roomId: roomId 
+              });
+            }, 1000); // Small delay to ensure both sides are ready
+          }
         }
       }
     });
@@ -220,6 +249,7 @@ export function useWebRTC(socket, roomId) {
     remoteVideoRef,
     localStream,
     remoteStream,
+    connectionStatus,
     toggleMute,
     toggleVideo,
     endCall,
