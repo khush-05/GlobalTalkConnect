@@ -7,12 +7,14 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import CallSetup from "@/pages/CallSetup";
 import VideoCall from "@/pages/VideoCall";
+import Instructions from "@/pages/Instructions";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/setup" component={CallSetup} />
+      <Route path="/instructions" component={Instructions} />
       <Route path="/call/:roomId" component={VideoCall} />
       <Route component={NotFound} />
     </Switch>

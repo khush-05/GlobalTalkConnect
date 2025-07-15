@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Globe, Video, Play, Languages, Shield, Mic, Volume2 } from "lucide-react";
+import { Globe, Video, Play, Languages, Shield, Mic, Volume2, Users } from "lucide-react";
 import { useLocation } from "wouter";
 import AnimatedGlobe from "@/components/AnimatedGlobe";
 
@@ -61,10 +61,11 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
+                  onClick={() => setLocation("/instructions")}
                   className="bg-white/20 text-white px-8 py-4 text-lg font-semibold hover:bg-white/30 backdrop-blur-sm border-white/30"
                 >
-                  <Play className="w-5 h-5 mr-2" />
-                  Watch Demo
+                  <Users className="w-5 h-5 mr-2" />
+                  How to Test
                 </Button>
               </div>
             </div>

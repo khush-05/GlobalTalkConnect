@@ -82,7 +82,16 @@ export default function VideoCall() {
         <div className="flex items-center">
           <Globe className="h-6 w-6 text-blue-500 mr-3" />
           <span className="text-white font-semibold">GlobalTalk</span>
-          <span className="text-gray-400 ml-4">Room: {roomId}</span>
+          <div className="ml-4 bg-gray-700 px-3 py-1 rounded-lg">
+            <span className="text-gray-300 text-xs">Room ID:</span>
+            <span className="text-white font-mono ml-1">{roomId}</span>
+            <button 
+              onClick={() => navigator.clipboard.writeText(roomId)}
+              className="ml-2 text-blue-400 hover:text-blue-300 text-xs"
+            >
+              Copy
+            </button>
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center text-gray-400">

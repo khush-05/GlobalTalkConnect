@@ -111,21 +111,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     });
 
-    socket.on("webrtc-offer", (data: { to: string; offer: any }) => {
+    socket.on("webrtc-offer", (data: { to: string; offer: any; roomId: string }) => {
+      console.log(`WebRTC offer from ${socket.id} to ${data.to} in room ${data.roomId}`);
       socket.to(data.to).emit("webrtc-offer", {
         from: socket.id,
         offer: data.offer,
       });
     });
 
-    socket.on("webrtc-answer", (data: { to: string; answer: any }) => {
+    socket.on("webrtc-answer", (data: { to: string; answer: any; roomId: string }) => {
+      console.log(`WebRTC answer from ${socket.id} to ${data.to} in room ${data.roomId}`);
       socket.to(data.to).emit("webrtc-answer", {
         from: socket.id,
         answer: data.answer,
       });
     });
 
-    socket.on("webrtc-ice-candidate", (data: { to: string; candidate: any }) => {
+    socket.on("webrtc-ice-candidate", (data: { to: string; candidate: any; roomId: string }) => {
+      console.log(`ICE candidate from ${socket.id} to ${data.to} in room ${data.roomId}`);
       socket.to(data.to).emit("webrtc-ice-candidate", {
         from: socket.id,
         candidate: data.candidate,
