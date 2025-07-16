@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 export default function Instructions() {
   const [, setLocation] = useLocation();
 
-  const copyText = (text) => {
+  const copyText = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 

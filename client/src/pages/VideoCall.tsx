@@ -73,7 +73,7 @@ export default function VideoCall() {
   }
 
   const connectedUsers = participants.length;
-  const remoteParticipant = participants.find(p => p.name !== userName);
+  const remoteParticipant = participants.find((p: { name: string; }) => p.name !== userName);
 
   return (
     <div className="h-screen bg-gray-900 flex flex-col">
